@@ -24,7 +24,7 @@ const components = {
 function App() {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
-      <Tldraw components={components} />
+      <Tldraw components={components} persistenceKey="inspiration-board" />
     </div>
   )
 }
