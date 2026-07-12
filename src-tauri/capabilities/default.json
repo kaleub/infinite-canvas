@@ -9,11 +9,11 @@
     "core:default",
     "dialog:default",
     "fs:default",
-    "fs:allow-read-text-file",
-    "fs:allow-write-text-file",
-    "fs:allow-mkdir",
-    "fs:allow-exists",
-    "fs:allow-read-dir",
-    "fs:scope"
+    "fs:allow-appconfig-read",
+    "fs:allow-appconfig-write",
+    "fs:allow-appconfig-meta",
+    "fs:allow-appconfig-read-recursive",
+    "fs:allow-appconfig-write-recursive",
+    "fs:allow-appconfig-meta-recursive"
   ]
 }
