@@ -8,7 +8,7 @@ const components = {
     //MainMenu: null,
     //PageMenu: null,
     QuickActions: null,
-  ContextMenu: null,
+  //ContextMenu: null,
   StylePanel: null,
   NavigationPanel: null,
   ZoomMenu: null,
