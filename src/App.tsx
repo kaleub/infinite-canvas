@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Tldraw } from 'tldraw'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Tldraw, type Editor } from 'tldraw'
 import 'tldraw/tldraw.css'
 import { Onboarding } from './components/Onboarding'
 import { loadVaultConfig } from './lib/vaultConfig'
+import { loadCanvasIntoEditor, saveCanvasFromEditor } from './lib/canvasPersistence'
+import { createVaultAssetStore } from './lib/vaultAssetStore'
 
 // Hide every default UI piece we don't need
 const components = {
@@ -28,6 +30,7 @@ const components = {
 function App() {
   const [vaultPath, setVaultPath] = useState<string | null>(null)
   const [checked, setChecked] = useState(false)
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     loadVaultConfig().then((config) => {
@@ -38,8 +41,38 @@ function App() {
     })
   }, [])
 
+  const assetStore = useMemo(() => {
+    if (!vaultPath) return undefined
+    return createVaultAssetStore(vaultPath)
+  }, [vaultPath])
+
+  function handleMount(editor: Editor) {
+    if (!vaultPath) return
+
+    loadCanvasIntoEditor(editor, vaultPath)
+
+    const unsubscribe = editor.store.listen(
+      () => {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+        }
+        saveTimeoutRef.current = setTimeout(() => {
+          saveCanvasFromEditor(editor, vaultPath)
+        }, 3000)
+      },
+      { scope: 'document', source: 'user' }
+    )
+
+    return () => {
+      unsubscribe()
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }
+
   if (!checked) {
-    return null // brief loading state, avoids onboarding flash
+    return null
   }
 
   if (!vaultPath) {
@@ -48,7 +81,7 @@ function App() {
 
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
-      <Tldraw components={components} />
+      <Tldraw components={components} assets={assetStore} onMount={handleMount} />
     </div>
   )
 }

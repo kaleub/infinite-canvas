@@ -1,5 +1,6 @@
 import { exists, readTextFile, writeTextFile, mkdir } from '@tauri-apps/plugin-fs'
 import { appConfigDir, join } from '@tauri-apps/api/path'
+import { invoke } from '@tauri-apps/api/core'
 
 export interface VaultConfig {
   vaultPath: string
@@ -19,7 +20,18 @@ export async function loadVaultConfig(): Promise<VaultConfig | null> {
   }
 
   const contents = await readTextFile(configPath)
-  return JSON.parse(contents) as VaultConfig
+  const config = JSON.parse(contents) as VaultConfig
+
+  await invoke('allow_vault_directory', { path: config.vaultPath })
+
+  const vaultFolderExists = await exists(config.vaultPath)
+  if (!vaultFolderExists) {
+    // Vault was moved, renamed, or deleted — treat as if never configured,
+    // so onboarding runs again to reconnect or set a new one.
+    return null
+  }
+
+  return config
 }
 
 export async function saveVaultConfig(config: VaultConfig): Promise<void> {
