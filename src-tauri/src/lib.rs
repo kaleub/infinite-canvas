@@ -1,3 +1,4 @@
+use tauri::Manager;
 use tauri_plugin_fs::FsExt;
 
 #[tauri::command]
