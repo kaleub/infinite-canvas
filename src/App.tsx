@@ -7,6 +7,7 @@ import { loadCanvasIntoEditor, saveCanvasFromEditor } from './lib/canvasPersiste
 import { createVaultAssetStore } from './lib/vaultAssetStore'
 import { uiOverrides } from './lib/uiOverrides'
 import { MinimalToolbar } from './components/Toolbar'
+import { NonLockableFrameTool } from './lib/NonLockableFrameTool'
 
 // Hide every default UI piece we don't need
 const components = {
@@ -29,6 +30,8 @@ const components = {
   CursorChatBubble: null,
   KeyboardShortcutsDialog: null,
 }
+
+const customTools = [NonLockableFrameTool]
 
 function App() {
   const [vaultPath, setVaultPath] = useState<string | null>(null)
@@ -87,6 +90,7 @@ function App() {
       <Tldraw
       components={components}
       overrides={uiOverrides}
+      tools={customTools}
       assets={assetStore}
       onMount={handleMount}
       />
