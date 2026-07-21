@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { chooseVaultFolder } from '../lib/chooseVaultFolder'
+import type { VaultsConfig } from '../lib/vaultConfig'
 
 interface OnboardingProps {
-  onVaultReady: (vaultPath: string) => void
+  onVaultReady: (config: VaultsConfig) => void
 }
 
 export function Onboarding({ onVaultReady }: OnboardingProps) {
@@ -11,9 +12,9 @@ export function Onboarding({ onVaultReady }: OnboardingProps) {
   async function handleChooseVault() {
     setError(null)
     try {
-      const selectedPath = await chooseVaultFolder('Choose or create your vault folder')
-      if (selectedPath) {
-        onVaultReady(selectedPath)
+      const config = await chooseVaultFolder('Choose or create your vault folder')
+      if (config) {
+        onVaultReady(config)
       }
     } catch (err) {
       setError(String(err))

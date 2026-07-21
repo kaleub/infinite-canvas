@@ -1,11 +1,10 @@
 import { open } from '@tauri-apps/plugin-dialog'
-import { invoke } from '@tauri-apps/api/core'
-import { saveVaultConfig } from './vaultConfig'
+import { addVaultToConfig, type VaultsConfig } from './vaultConfig'
 
-// Opens the native folder picker, grants filesystem scope to the chosen
-// folder, and persists it as the active vault. Returns the chosen path,
+// Opens the native folder picker, adds the chosen folder to the known
+// vault list, and sets it as active. Returns the updated config,
 // or null if the user cancelled.
-export async function chooseVaultFolder(title: string): Promise<string | null> {
+export async function chooseVaultFolder(title: string): Promise<VaultsConfig | null> {
   const selectedPath = await open({
     directory: true,
     multiple: false,
@@ -16,8 +15,5 @@ export async function chooseVaultFolder(title: string): Promise<string | null> {
     return null
   }
 
-  await invoke('allow_vault_directory', { path: selectedPath })
-  await saveVaultConfig({ vaultPath: selectedPath })
-
-  return selectedPath
+  return await addVaultToConfig(selectedPath)
 }
