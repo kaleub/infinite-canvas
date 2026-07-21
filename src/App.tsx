@@ -5,9 +5,12 @@ import { Onboarding } from './components/Onboarding'
 import { loadVaultConfig } from './lib/vaultConfig'
 import { loadCanvasIntoEditor, saveCanvasFromEditor } from './lib/canvasPersistence'
 import { createVaultAssetStore } from './lib/vaultAssetStore'
+import { uiOverrides } from './lib/uiOverrides'
+import { MinimalToolbar } from './components/Toolbar'
 
 // Hide every default UI piece we don't need
 const components = {
+  Toolbar: MinimalToolbar,
   //Toolbar: null,
   //MenuPanel: null,
     //MainMenu: null,
@@ -81,7 +84,12 @@ function App() {
 
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
-      <Tldraw components={components} assets={assetStore} onMount={handleMount} />
+      <Tldraw
+      components={components}
+      overrides={uiOverrides}
+      assets={assetStore}
+      onMount={handleMount}
+      />
     </div>
   )
 }
