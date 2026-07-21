@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { open } from '@tauri-apps/plugin-dialog'
-import { invoke } from '@tauri-apps/api/core'
-import { saveVaultConfig } from '../lib/vaultConfig'
+import { chooseVaultFolder } from '../lib/chooseVaultFolder'
 
 interface OnboardingProps {
   onVaultReady: (vaultPath: string) => void
@@ -12,21 +10,11 @@ export function Onboarding({ onVaultReady }: OnboardingProps) {
 
   async function handleChooseVault() {
     setError(null)
-
-    const selectedPath = await open({
-      directory: true,
-      multiple: false,
-      title: 'Choose or create your vault folder',
-    })
-
-    if (!selectedPath || typeof selectedPath !== 'string') {
-      return // user cancelled
-    }
-
     try {
-      await invoke('allow_vault_directory', { path: selectedPath })
-      await saveVaultConfig({ vaultPath: selectedPath })
-      onVaultReady(selectedPath)
+      const selectedPath = await chooseVaultFolder('Choose or create your vault folder')
+      if (selectedPath) {
+        onVaultReady(selectedPath)
+      }
     } catch (err) {
       setError(String(err))
     }

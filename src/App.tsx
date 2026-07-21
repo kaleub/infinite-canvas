@@ -1,35 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Tldraw, type Editor } from 'tldraw'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Tldraw, type Editor, type TLComponents } from 'tldraw'
 import 'tldraw/tldraw.css'
 import { Onboarding } from './components/Onboarding'
+import { MinimalToolbar } from './components/Toolbar'
+import { CustomMainMenu } from './components/MainMenu'
 import { loadVaultConfig } from './lib/vaultConfig'
+import { chooseVaultFolder } from './lib/chooseVaultFolder'
 import { loadCanvasIntoEditor, saveCanvasFromEditor } from './lib/canvasPersistence'
 import { createVaultAssetStore } from './lib/vaultAssetStore'
 import { uiOverrides } from './lib/uiOverrides'
-import { MinimalToolbar } from './components/Toolbar'
 import { NonLockableFrameTool } from './lib/NonLockableFrameTool'
-
-// Hide every default UI piece we don't need
-const components = {
-  Toolbar: MinimalToolbar,
-  //Toolbar: null,
-  //MenuPanel: null,
-    //MainMenu: null,
-    //PageMenu: null,
-    QuickActions: null,
-  //ContextMenu: null,
-  StylePanel: null,
-  NavigationPanel: null,
-  ZoomMenu: null,
-  ActionsMenu: null,
-  HelpMenu: null,
-  DebugPanel: null,
-  DebugMenu: null,
-  TopPanel: null,
-  SharePanel: null,
-  CursorChatBubble: null,
-  KeyboardShortcutsDialog: null,
-}
 
 const customTools = [NonLockableFrameTool]
 
@@ -47,10 +27,37 @@ function App() {
     })
   }, [])
 
+  const handleChangeVault = useCallback(async () => {
+    const selectedPath = await chooseVaultFolder('Choose a new vault folder')
+    if (selectedPath) {
+      setVaultPath(selectedPath)
+    }
+  }, [])
+
   const assetStore = useMemo(() => {
     if (!vaultPath) return undefined
     return createVaultAssetStore(vaultPath)
   }, [vaultPath])
+
+  const components: TLComponents = useMemo(
+    () => ({
+      Toolbar: MinimalToolbar,
+      MainMenu: (props) => <CustomMainMenu {...props} onChangeVault={handleChangeVault} />,
+      StylePanel: null,
+      NavigationPanel: null,
+      ZoomMenu: null,
+      ActionsMenu: null,
+      HelpMenu: null,
+      DebugPanel: null,
+      DebugMenu: null,
+      TopPanel: null,
+      SharePanel: null,
+      CursorChatBubble: null,
+      KeyboardShortcutsDialog: null,
+      QuickActions: null,
+    }),
+    [handleChangeVault]
+  )
 
   function handleMount(editor: Editor) {
     if (!vaultPath) return
@@ -88,11 +95,12 @@ function App() {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <Tldraw
-      components={components}
-      overrides={uiOverrides}
-      tools={customTools}
-      assets={assetStore}
-      onMount={handleMount}
+        key={vaultPath}
+        components={components}
+        overrides={uiOverrides}
+        tools={customTools}
+        assets={assetStore}
+        onMount={handleMount}
       />
     </div>
   )
